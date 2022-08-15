@@ -6,9 +6,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/magier25/go-bookings/pkg/config"
-	"github.com/magier25/go-bookings/pkg/models"
-	"github.com/magier25/go-bookings/pkg/render"
+	"github.com/magier25/go-bookings/internal/config"
+	"github.com/magier25/go-bookings/internal/models"
+	"github.com/magier25/go-bookings/internal/render"
 )
 
 // Repo the repository used by the handlers
