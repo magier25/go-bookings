@@ -60,6 +60,20 @@
     attention.custom({
       title: 'Choose your dates',
       msg: html,
+      callback: function(result) {
+        const form = document.getElementById("check-availability-form");
+        let formData = new FormData(form);
+        formData.append("csrf_token", "{{.CSRFToken}}");
+
+        fetch("/search-availability-json", {
+            method: "post",
+            body: formData,
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log(data)
+          })
+      }
     });
   });
 
