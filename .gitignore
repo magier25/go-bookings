@@ -21,3 +21,5 @@ go.work
 
 # misc
 .DS_Store
+
+database.yml
