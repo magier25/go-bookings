@@ -106,8 +106,10 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 
 	err := r.ParseForm()
 	if err != nil {
-		helpers.ServerError(w, err)
+		m.App.Session.Put(r.Context(), "error", "cannot parse form")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
+
 	}
 
 	reservation.FirstName = r.Form.Get("first_name")
@@ -123,7 +125,7 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 	if !form.Valid() {
 		data := make(map[string]any)
 		data["reservation"] = reservation
-
+		http.Error(w, "", http.StatusSeeOther)
 		render.Template(w, r, "make-reservation.page.go.tmpl", &models.TemplateData{
 			Form: form,
 			Data: data,
@@ -134,8 +136,10 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 	var reservationID int
 	reservationID, err = m.DB.InsertReservation(reservation)
 	if err != nil {
-		helpers.ServerError(w, err)
+		m.App.Session.Put(r.Context(), "error", "cannot insert reservation into database!")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
+
 	}
 
 	restriction := models.RoomRestriction{
@@ -148,7 +152,8 @@ func (m *Repository) PostReservation(w http.ResponseWriter, r *http.Request) {
 
 	err = m.DB.InsertRoomRestriction(restriction)
 	if err != nil {
-		helpers.ServerError(w, err)
+		m.App.Session.Put(r.Context(), "error", "cannot insert room restriction into database!")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
 
