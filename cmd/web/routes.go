@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/magier25/go-bookings/internal/config"
@@ -37,9 +36,10 @@ func routes(app *config.AppConfig) http.Handler {
 	fileServer := http.FileServer(http.Dir("./static/"))
 	mux.Handle("/static/*", http.StripPrefix("/static", fileServer))
 
-	routes := mux.Routes()
-	for _, route := range routes {
-		log.Println(route.Pattern)
-	}
+	// lists all routes patterns
+	// routes := mux.Routes()
+	// for _, route := range routes {
+	// 	log.Println(route.Pattern)
+	// }
 	return mux
 }
