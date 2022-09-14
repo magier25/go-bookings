@@ -7,11 +7,16 @@ import (
 	"html/template"
 	"net/http"
 	"path/filepath"
+	"time"
 
 	"github.com/justinas/nosurf"
 	"github.com/magier25/go-bookings/internal/config"
 	"github.com/magier25/go-bookings/internal/models"
 )
+
+var functions = template.FuncMap{
+	"humanDate": HumanDate,
+}
 
 var app *config.AppConfig
 var pathToTemplates = "./templates"
@@ -19,6 +24,11 @@ var pathToTemplates = "./templates"
 // NewRenderer sets the config for the template cache
 func NewRenderer(a *config.AppConfig) {
 	app = a
+}
+
+// HumanDate return date in YYYY-MM-DD format
+func HumanDate(t time.Time) string {
+	return t.Format("2006-01-02")
 }
 
 func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateData {
@@ -79,7 +89,7 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 	// range through all files ending with *.page.tmpl
 	for _, page := range pages {
 		name := filepath.Base(page)
-		ts, err := template.New(name).ParseFiles(page)
+		ts, err := template.New(name).Funcs(functions).ParseFiles(page)
 		if err != nil {
 			return myCache, err
 		}
