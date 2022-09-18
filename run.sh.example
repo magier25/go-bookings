@@ -1,0 +1,4 @@
+#!/bin/bash
+echo "Starting booking application..."
+
+go run ./cmd/web  -cache=false -production=false -dbhost=DBHOST -dbname=DBNAME -dbport=5432 -dbuser=DBUSER -dbpass=PASSWORD

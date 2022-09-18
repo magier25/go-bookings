@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/gob"
+	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -26,12 +28,38 @@ var errorLog *log.Logger
 
 // main is the main application function
 func main() {
-	db, err := run()
+
+	// read flags
+	inProduction := flag.Bool("production", true, "Application is in production")
+	useCache := flag.Bool("cache", true, "Use template cache")
+	dbHost := flag.String("dbhost", "localhost", "Database host")
+	dbName := flag.String("dbname", "", "Database name")
+	dbUser := flag.String("dbuser", "", "Database user")
+	dbPass := flag.String("dbpass", "", "Database password")
+	dbPort := flag.String("dbport", "5432", "Database port")
+	dbSSL := flag.String("dbssl", "disable", "Database ssl settings (disable, prefer, require)")
+
+	flag.Parse()
+	if *dbName == "" || *dbUser == "" {
+		log.Println("Missing required flags")
+		os.Exit(1)
+	}
+
+	// connect to database
+	log.Println("Connecting to database...")
+	connectionString := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s", *dbHost, *dbPort, *dbName, *dbUser, *dbPass, *dbSSL)
+	db, err := driver.ConnectSQL(connectionString)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Cannot connect to database! Exiting...")
 	}
 	defer db.SQL.Close()
 
+	log.Println("Connected to database.")
+
+	err = run(*inProduction, *useCache, db)
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer close(app.MailChan)
 
 	log.Println("Starting mail listener...")
@@ -49,7 +77,7 @@ func main() {
 	}
 }
 
-func run() (*driver.DB, error) {
+func run(inProduction, useCache bool, db *driver.DB) error {
 	// what am I going to put in the session
 	gob.Register(models.Reservation{})
 	gob.Register(models.User{})
@@ -61,7 +89,7 @@ func run() (*driver.DB, error) {
 	app.MailChan = mailChan
 
 	// change this to true when in production
-	app.InProduction = false
+	app.InProduction = inProduction
 	infoLog = log.New(os.Stdout, "INFO:\t", log.Ldate|log.Ltime)
 	app.InfoLog = infoLog
 	errorLog = log.New(os.Stderr, "ERROR:\t", log.Ldate|log.Ltime|log.Lshortfile)
@@ -75,26 +103,18 @@ func run() (*driver.DB, error) {
 
 	app.Session = session
 
-	// connect to database
-	log.Println("Connecting to database...")
-	db, err := driver.ConnectSQL("host=127.0.0.1 port=5432 dbname=bookings user=postgres password=postgres")
-	if err != nil {
-		log.Fatal("Cannot connect to database! Exiting...")
-	}
-	log.Println("Connected to database.")
-
 	tc, err := render.CreateTemplateCache()
 	if err != nil {
 		log.Fatal("cannot read template cache")
-		return nil, err
+		return err
 	}
 	app.TemplateCache = tc
-	app.UseCache = true
+	app.UseCache = useCache
 
 	repo := handlers.NewRepo(&app, db)
 	handlers.NewHandlers(repo)
 	helpers.NewHelpers(&app)
 	render.NewRenderer(&app)
 
-	return db, nil
+	return nil
 }
