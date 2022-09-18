@@ -59,6 +59,9 @@ func (m *testDBRepo) UpdateUser(u models.User) error {
 }
 
 func (m *testDBRepo) Authenticate(email, testPassword string) (int, string, error) {
+	if email == "jack@example.com" {
+		return 0, "", errors.New("some error")
+	}
 	return 1, "pa$$w0rd", nil
 }
 

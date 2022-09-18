@@ -100,6 +100,11 @@ func getRoutes() http.Handler {
 	mux.Post("/search-availability-json", Repo.AvailabilityJSON)
 	mux.Get("/contact", Repo.Contact)
 
+	mux.Get("/user/login", Repo.ShowLogin)
+	mux.Post("/user/login", Repo.PostShowLogin)
+	mux.Get("/user/logout", Repo.Logout)
+	mux.Get("/admin/dashboard", Repo.AdminDashboard)
+
 	fileServer := http.FileServer(http.Dir("./static/"))
 	mux.Handle("/static/*", http.StripPrefix("/static", fileServer))
 
