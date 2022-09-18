@@ -11,22 +11,27 @@
   {{$currMonth := index .StringMap "this_month"}}
   {{$currYear := index .StringMap "this_month_year"}}
 
-    <div class="col-md-12">
-      <div class="text-center">
-        <h3>{{formatDate $now "January"}} {{formatDate $now "2006"}}</h3>
-      </div>
+  <div class="col-md-12">
+    <div class="text-center">
+      <h3>{{formatDate $now "January"}} {{formatDate $now "2006"}}</h3>
     </div>
+  </div>
 
-    <div class="float-left">
-      <a href="/admin/reservations-calendar?y={{index .StringMap "last_month_year"}}&m={{index .StringMap "last_month"}}"
-        class="btn btn-sm btn-outline-secondary">&lt;&lt;</a>
-    </div>
-    <div class="float-right">
-      <a href="/admin/reservations-calendar?y={{index .StringMap "next_month_year"}}&m={{index .StringMap "next_month"}}"
-        class="btn btn-sm btn-outline-secondary">&gt;&gt;</a>
-    </div>
+  <div class="float-left">
+    <a href="/admin/reservations-calendar?y={{index .StringMap "last_month_year"}}&m={{index .StringMap "last_month"}}"
+      class="btn btn-sm btn-outline-secondary">&lt;&lt;</a>
+  </div>
+  <div class="float-right">
+    <a href="/admin/reservations-calendar?y={{index .StringMap "next_month_year"}}&m={{index .StringMap "next_month"}}"
+      class="btn btn-sm btn-outline-secondary">&gt;&gt;</a>
+  </div>
 
-    <div class="clearfix"></div>
+  <div class="clearfix"></div>
+
+  <form method="post" action="/admin/reservations-calendar">
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+    <input type="hidden" name="m" value="{{index .StringMap "this_month"}}">
+    <input type="hidden" name="y" value="{{index .StringMap "this_month_year"}}">
 
     {{range $rooms}}
       {{$roomID := .ID}}
@@ -59,6 +64,7 @@
                       value="{{index $blocks (printf "%s-%s-%d" $currYear $currMonth (add $index 1))}}"
                     {{else}}
                       name="add_block_{{$roomID}}_{{printf "%s-%s-%d" $currYear $currMonth (add $index 1)}}"
+                      value="1"
                     {{end}}
                   type="checkbox">
                 {{end}}
@@ -68,4 +74,8 @@
         </table>
       </div>
     {{end}}
+
+    <hr/>
+    <input type="submit" class="btn btn-primary" value="Save Changes"/>
+  </form>
 {{end}}

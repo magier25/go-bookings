@@ -673,3 +673,21 @@ func (m *Repository) AdminDeleteReservation(w http.ResponseWriter, r *http.Reque
 
 	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
 }
+
+// AdminPostReservationsCalendar handles post of reservation calendar
+func (m *Repository) AdminPostReservationsCalendar(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	year, _ := strconv.Atoi(r.Form.Get("y"))
+	month, _ := strconv.Atoi(r.Form.Get("m"))
+
+	// TODO: process blocks
+
+	m.App.Session.Put(r.Context(), "flash", "Changes saved")
+	redirect_url := fmt.Sprintf("/admin/reservations-calendar?y=%d&m=%d", year, month)
+	http.Redirect(w, r, redirect_url, http.StatusSeeOther)
+}
